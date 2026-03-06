@@ -1,17 +1,26 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
 </head>
 <body style="margin: 0; overflow: hidden;">
-    <a-scene embedded arjs>
-        <a-marker type="pattern" url="pattern-b80_0132a.patt">
-            <a-entity id="rate-display" position="0 0.5 0" rotation="-90 0 0"
-                      text="value: Loading...; color: #228B22; align: center; width: 4;"></a-entity>
+    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
+        
+        <a-marker preset="hiro">
+            <a-entity 
+                id="rate-display" 
+                position="0 1 0" 
+                rotation="-90 0 0"
+                scale="2 2 2"
+                text="value: Loading Price...; color: yellow; align: center; width: 6;">
+            </a-entity>
         </a-marker>
+
         <a-entity camera></a-entity>
     </a-scene>
+
     <script>
         async function updatePrice() {
             try {
@@ -19,10 +28,14 @@
                 const data = await response.json();
                 const rate = data.rates.IRR;
                 const price = (10000 / rate).toFixed(4);
-                document.querySelector('#rate-display').setAttribute('text', 'value', `10,000 Rial = $${price} USD`);
-            } catch (e) { console.log("Error!"); }
+                
+                const display = document.querySelector('#rate-display');
+                display.setAttribute('text', 'value', `10,000 Rial = $${price} USD`);
+            } catch (e) { 
+                document.querySelector('#rate-display').setAttribute('text', 'value', "Error");
+            }
         }
-        window.onload = updatePrice;
+        window.addEventListener('load', updatePrice);
     </script>
 </body>
 </html>
