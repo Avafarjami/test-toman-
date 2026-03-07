@@ -2,79 +2,48 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-    
-    <style>
-        /* دکمه و کادر ورود متن برای نسخه تعاملی */
-        .ui-container {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1000;
-            display: flex;
-            gap: 10px;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 10px;
-            border-radius: 15px;
-        }
-        input { padding: 10px; border-radius: 5px; border: none; width: 150px; }
-        button { padding: 10px 20px; border-radius: 5px; border: none; background: #228B22; color: white; cursor: pointer; font-weight: bold; }
-    </style>
 </head>
-
 <body style="margin: 0; overflow: hidden;">
-
-    <div class="ui-container">
-        <input type="text" id="user-input" placeholder="پیام شما...">
-        <button onclick="updateText()">ثبت</button>
-    </div>
-
-    <a-scene 
-        embedded 
-        arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3; labelingMode: blackboard;"
-        vr-mode-ui="enabled: false">
+    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
         
         <a-marker type="pattern" url="pattern-banknote.patt">
-            
             <a-entity 
-                id="ar-text" 
+                id="rate-display" 
                 position="0 0.5 0" 
                 rotation="-90 0 0"
-                text="value: سلام!; color: #228B22; align: center; width: 4; font: https://cdn.aframe.io/fonts/Exo2Bold.fnt">
+                scale="2 2 2"
+                text="value: Loading...; color: #228B22; align: center; width: 5;">
             </a-entity>
-
-            </a-marker>
+        </a-marker>
 
         <a-entity camera></a-entity>
     </a-scene>
 
     <script>
-        // تابع تغییر متن تعاملی
-        function updateText() {
-            const val = document.getElementById('user-input').value;
-            const textEntity = document.querySelector('#ar-text');
-            if(val.trim() !== "") {
-                textEntity.setAttribute('text', 'value', val);
-                document.getElementById('user-input').value = ""; // پاک کردن کادر
-            }
-        }
-
-        // بخش دریافت قیمت دلار (اگر هنوز نیاز دارید، این را نگه دارید)
-        async function fetchPrice() {
+        // تابعی که دقیقاً مثل نسخه اول قیمت دلار را می‌گیرد
+        async function updatePrice() {
             try {
                 const response = await fetch("https://open.er-api.com/v6/latest/USD");
                 const data = await response.json();
                 const rate = data.rates.IRR;
+                
+                // محاسبه قیمت بر اساس ۱۰,۰۰۰ ریال (مطابق کد قبلی شما)
                 const price = (10000 / rate).toFixed(4);
-                document.querySelector('#ar-text').setAttribute('text', 'value', `10k Rial = $${price}`);
-            } catch (e) { console.log("API Error"); }
+                
+                // نمایش در دنیای واقعیت افزوده
+                const display = document.querySelector('#rate-display');
+                display.setAttribute('text', 'value', `10,000 Rial = $${price} USD`);
+                
+            } catch (e) { 
+                console.error("خطا در ارتباط با API:", e);
+                document.querySelector('#rate-display').setAttribute('text', 'value', "API Error!");
+            }
         }
-        
-        // اجرای خودکار دریافت قیمت در بدو ورود (اختیاری)
-        // window.onload = fetchPrice;
+
+        // اجرای تابع به محض لود شدن صفحه
+        window.onload = updatePrice;
     </script>
 </body>
 </html>
